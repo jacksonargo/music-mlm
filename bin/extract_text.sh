@@ -11,6 +11,6 @@ while ! [ -d data ]; do
 done
 
 for file in data/src/*.pdf; do
-  output="data/output/$(basename "$file" .pdf | cksum | awk '{print $1}').txt"
+  output="data/extraction/$(basename "$file" .pdf | cksum | awk '{print $1}').txt"
   pdftotext "$file" "$output"
 done
