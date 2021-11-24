@@ -5,7 +5,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"log"
-	"music-production-qa/qa/textbook"
+	"music-production-qa/questions/textbook"
 	"os"
 	"strconv"
 )

@@ -5,6 +5,10 @@ function App() {
   const [context, setContext] = useState("");
   const [cursorAt, setCursorAt] = useState(0);
 
+  const clean = context
+    .replaceAll(/(\w)-\s*[\n\r]/g, "$1")
+    .replaceAll(/\s+/g, " ");
+
   return (
     <Container>
       <TextField
@@ -17,18 +21,16 @@ function App() {
       />
       <h3>Context</h3>
       <p>
-        {Array.from(
-          context
-            .split(" ")
-            .filter((d) => d.length > 0)
-            .join(" ")
-        ).map((d, i) => (
+        {}
+        {Array.from(clean).map((d, i) => (
           <span key={i} onClick={() => setCursorAt(i)}>
-            {cursorAt === i ? (
-              <span style={{ textDecoration: "underline" }}>{d}</span>
-            ) : (
-              d
-            )}
+            <span
+              style={{
+                textDecoration: cursorAt === i ? "underline" : undefined,
+              }}
+            >
+              {d}
+            </span>
           </span>
         ))}
       </p>
