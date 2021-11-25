@@ -5,7 +5,7 @@ from transformers import BertTokenizer, BertForMaskedLM
 
 MASK_PROBABILITY = 0.15
 MAX_SENTENCE_LENGTH = 512
-BATCH_SIZE = 16
+BATCH_SIZE = 1
 
 TOKEN_CLS = 101
 TOKEN_SEP = 102
@@ -18,19 +18,17 @@ class Dataset(torch.utils.data.Dataset):
         self.encodings = encodings
 
     def __getitem__(self, idx):
-        return {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
+        return {key:  val[idx].clone().detach() for key, val in self.encodings.items()}
 
     def __len__(self):
         return len(self.encodings.input_ids)
 
 
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-model = BertForMaskedLM.from_pretrained('bert-base-uncased')
-
 with open('practice_data/content.txt', 'r') as fp:
     # this data has every sentence on a new line,
     inputSentences = fp.read().split('\n')  # so we split by new line
 
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 inputTensors = tokenizer(
     inputSentences,
     return_tensors='pt',
@@ -38,8 +36,7 @@ inputTensors = tokenizer(
     truncation=True,
     padding='max_length')
 
-inputTensors['labels'] = inputTensors.input_ids.detach().clone()
-
+inputTensors['labels'] = inputTensors.input_ids.clone().detach()
 maskingTensors = (torch.rand(inputTensors.input_ids.shape) < MASK_PROBABILITY) * \
                  (inputTensors.input_ids != TOKEN_CLS) * \
                  (inputTensors.input_ids != TOKEN_SEP) * \
@@ -50,14 +47,15 @@ for i in range(inputTensors.input_ids.shape[0]):
     inputTensors.input_ids[i, maskedIndices[i]] = TOKEN_MASK
 
 dataset = Dataset(inputTensors)
-
 dataLoader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
+model = BertForMaskedLM.from_pretrained('bert-base-uncased')
 model.to(device)
 model.train()
 
-optimizer = AdamW(model.parameters(), lr=5e-5)
+optimizer = AdamW(model.parameters())
 epochs = 2
 for epoch in range(epochs):
     loop = tqdm(dataLoader, leave=True)
