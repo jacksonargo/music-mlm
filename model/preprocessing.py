@@ -1,4 +1,3 @@
-import io
 import os
 import typing
 
@@ -22,28 +21,6 @@ def concat_files(srcpath: str, destpath: str):
                 writer.write(reader.read())
 
 
-def extract_pdf_text(fp: io.FileIO) -> str:
-    "\n\n".join(pdftotext.PDF(fp))
-
-
-def sentence_per_line(text: str) -> str:
-    result = sentenceTokenizer.tokenize(text)
-    return "\n".join([k.replace("\n", " ") for k in result])
-
-
-def chunk(text: str, size: int) -> [str]:
-    cur_chunk = ""
-    result = []
-    split = text.split("\n")
-    for line in split:
-        if len(bytes(cur_chunk, 'utf-8')) + len(bytes(line, 'utf-8')) > size:
-            result.append(cur_chunk)
-            cur_chunk = ""
-        cur_chunk += line
-    result.append(cur_chunk)
-    return result
-
-
 def transform_corpus(srcpath: str, destpath: str, fn: typing.Callable[[str], str]):
     srcpath = os.fsencode(srcpath)
     destpath = os.fsencode(destpath)
@@ -52,6 +29,13 @@ def transform_corpus(srcpath: str, destpath: str, fn: typing.Callable[[str], str
         with open(os.path.join(srcpath, os.fsencode("corpus.txt")), encoding='utf-8') as reader:
             writer.write(fn(reader.read()))
 
+
+def sentence_per_line(text: str) -> str:
+    result = sentenceTokenizer.tokenize_sentences(text)
+    return "\n".join([k.replace("\n", " ") for k in result])
+
+def remove_header_footer(text: str) -> str:
+    return re.sub("^.*.*$", "", text)
 
 concat_files(
     srcpath="../data/01_extraction",
