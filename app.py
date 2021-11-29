@@ -7,8 +7,7 @@ MASK_TOKEN = "[MASK]"
 
 app = Flask(__name__)
 
-model = AutoModelForMaskedLM.from_pretrained(
-    'model/param_search_checkpoints/num_epoch=2/batch_size=16/learning_rate=2e-05')
+model = AutoModelForMaskedLM.from_pretrained('jacksonargo/music-production-qa')
 unmask = pipeline('fill-mask', model=model, tokenizer=tokenizer)
 
 
