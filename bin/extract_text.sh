@@ -26,19 +26,3 @@ for file in data/00_src/*.pdf; do
   output="data/01_extraction/$(basename "$file" .pdf | cksum | awk '{print $1}').txt"
   pdftotext -layout "$file" "$output"
 done
-
-echo stage 02_remove_header_footer
-
-mkdir -p data/02_remove_header_footer
-for file in data/01_extraction/*txt; do
-  output="data/02_remove_header_footer/$(basename "$file")"
-  sed 's/.*$//' <"$file" >"$output"
-done
-
-echo stage 03_concat_hyphenated
-
-mkdir -p data/03_concat_hyphenated
-for file in data/02_remove_header_footer/*txt; do
-  output="data/03_concat_hyphenated/$(basename "$file")"
-  sed 's/(\w)-\s*[\n\r]//g' <"$file" >"$output"
-done

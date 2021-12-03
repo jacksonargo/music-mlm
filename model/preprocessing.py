@@ -2,6 +2,7 @@ import os
 import typing
 
 import nltk.data
+import unicodedata
 
 sentenceTokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
@@ -30,18 +31,34 @@ def transform_corpus(srcpath: str, destpath: str, fn: typing.Callable[[str], str
             writer.write(fn(reader.read()))
 
 
+def remove_control_characters(text: str) -> str:
+    return "".join(ch for ch in text if unicodedata.category(ch)[0] != "C" and ch != "■" and ch != "◆")
+
+
 def sentence_per_line(text: str) -> str:
-    result = sentenceTokenizer.tokenize_sentences(text)
+    result = sentenceTokenizer.tokenize(text)
     return "\n".join([k.replace("\n", " ") for k in result])
 
-def remove_header_footer(text: str) -> str:
-    return re.sub("^.*.*$", "", text)
+
+def remove_one_word_sentences(text: str) -> str:
+    return "\n".join([line for line in text.split("\n") if ' ' in line])
+
 
 concat_files(
-    srcpath="../data/01_extraction",
-    destpath="../data/02_concatenate")
+    srcpath="data/01_extraction",
+    destpath="data/02_concatenate")
 
 transform_corpus(
-    srcpath="../data/02_concatenate",
-    destpath="../data/03_sentence_per_line",
+    srcpath="data/02_concatenate",
+    destpath="data/03_remove_control_characters",
+    fn=remove_control_characters)
+
+transform_corpus(
+    srcpath="data/03_remove_control_characters",
+    destpath="data/04_sentence_per_line",
     fn=sentence_per_line)
+
+transform_corpus(
+    srcpath="data/04_sentence_per_line",
+    destpath="data/05_remove_one_word_sentencese",
+    fn=remove_one_word_sentences)

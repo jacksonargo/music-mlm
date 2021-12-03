@@ -19,4 +19,4 @@ tokenizer = DistilBertTokenizer.from_pretrained(DISTILBERT_BASE_UNCASED, model_m
 
 
 def tokenize_sentences(sentences):
-    return Dataset(tokenizer(sentences, padding="max_length", truncation=True))
+    return Dataset(tokenizer(sentences, padding="max_length", truncation=True, return_special_tokens_mask=True))

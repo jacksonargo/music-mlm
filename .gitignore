@@ -1,5 +1,6 @@
 data
 practice_data
+notebooks_archive
 __pycache__
 .idea
 *.iml
