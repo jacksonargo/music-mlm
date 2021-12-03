@@ -4,3 +4,4 @@ notebooks_archive
 __pycache__
 .idea
 *.iml
+.ipynb_checkpoints
