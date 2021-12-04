@@ -21,7 +21,7 @@ def unmask_handler():
     return {"result": unmask(sentence)}
 
 
-@app.route("/", defaults={'path': ''})
+@app.route("/")
 def serve():
     return send_from_directory(app.static_folder, 'index.html')
 
