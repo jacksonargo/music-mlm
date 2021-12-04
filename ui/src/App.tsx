@@ -29,7 +29,19 @@ function App() {
   return (
     <Container>
       <Stack spacing={4}>
-        <h1>Music Production Masked Language Model</h1>
+        <h1>
+          MusicMLM: A Resource Efficient Masked Language Model Fine-Tuned for
+          Music Production.
+        </h1>
+        <Box>
+          <a href="https://github.com/jacksonargo/music-mlm/raw/main/MusicMLM.pdf">
+            Read the paper
+          </a>
+          {" | "}
+          <a href="https://github.com/jacksonargo/music-mlm/">
+            Read the source code
+          </a>
+        </Box>
         <NextWordPrediction />
         <FillInTheBlank />
       </Stack>
@@ -46,7 +58,7 @@ function NextWordPrediction() {
     <Stack spacing={2}>
       <Box>
         <h2>Next Word Prediction</h2>
-        <em>Let the model predict the next word in the sentence.</em>
+        <em>Let MusicMLM predict the next word in the sentence.</em>
       </Box>
       <Box>
         <TextField
@@ -75,7 +87,7 @@ function FillInTheBlank() {
     <Stack spacing={2}>
       <Box>
         <h2>Fill in the {MASK}</h2>
-        <em>Let the model predict the masked word.</em>
+        <em>Let MusicMLM predict the masked word.</em>
         <ul>
           <li>You have to include {MASK} in the sentence.</li>
           <li>You can only have on {MASK} in the sentence.</li>
@@ -102,28 +114,32 @@ function FillInTheBlank() {
 
 function resultsTable(results: UnmaskResult[] | undefined) {
   return (
-    <Table size={"small"}>
-      <TableHead>
-        <TableRow>
-          <TableCell>Sequence</TableCell>
-          <TableCell>Score</TableCell>
-          <TableCell>Token ID</TableCell>
-          <TableCell>Token String</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {results?.map((r, i) => (
-          <TableRow key={i}>
-            <TableCell>
-              {r.sequence.charAt(0).toUpperCase() + r.sequence.slice(1)}
-            </TableCell>
-            <TableCell>{r.score}</TableCell>
-            <TableCell style={{ font: "monospace" }}>{r.token}</TableCell>
-            <TableCell style={{ font: "monospace" }}>{r.token_str}</TableCell>
+    <Box>
+      <Table size={"small"}>
+        <TableHead>
+          <TableRow>
+            <TableCell>Rank</TableCell>
+            <TableCell>Sequence</TableCell>
+            <TableCell>Score</TableCell>
+            <TableCell>Token ID</TableCell>
+            <TableCell>Token String</TableCell>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHead>
+        <TableBody>
+          {results?.map((r, i) => (
+            <TableRow key={i}>
+              <TableCell>{i + 1}</TableCell>
+              <TableCell>
+                {r.sequence.charAt(0).toUpperCase() + r.sequence.slice(1)}
+              </TableCell>
+              <TableCell>{r.score}</TableCell>
+              <TableCell style={{ font: "monospace" }}>{r.token}</TableCell>
+              <TableCell style={{ font: "monospace" }}>{r.token_str}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Box>
   );
 }
 
@@ -135,16 +151,13 @@ function useUnmaskResults(sentence: string): UnmaskResult[] | undefined {
   );
   useEffect(() => {
     if (!sentence.includes(MASK_TOKEN)) return;
-    unmask(sentence).then((newResults) => setResults(newResults));
+    fetch("/api/unmask", {
+      method: "POST",
+      body: JSON.stringify({ sentence }),
+    })
+      .then((resp) => resp.json())
+      .then((data) => data as UnmaskApiResponse)
+      .then((newResults) => setResults(newResults));
   }, [sentence]);
   return results?.result;
-}
-
-function unmask(sentence: string): Promise<UnmaskApiResponse> {
-  return fetch("/api/unmask", {
-    method: "POST",
-    body: JSON.stringify({ sentence }),
-  })
-    .then((resp) => resp.json())
-    .then((data) => data as UnmaskApiResponse);
 }

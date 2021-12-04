@@ -7,7 +7,7 @@ from model.tokenizer import tokenizer
 app = Flask(__name__, static_url_path='', static_folder='ui/build')
 
 model = AutoModelForMaskedLM.from_pretrained(MUSIC_MLM)
-unmask = pipeline('fill-mask', model=model, tokenizer=tokenizer)
+unmask = pipeline('fill-mask', model=model, tokenizer=tokenizer, top_k=10)
 
 
 @app.route("/api/unmask", methods=['POST'])
